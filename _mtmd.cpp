@@ -1,0 +1,6 @@
+#include "mtmd-helper.cpp"
+#include "clip.cpp"
+#include "mtmd-audio.cpp"
+#include "mtmd.cpp"
+#include "mtmd-image.cpp"
+#include "clip_inc.h"
