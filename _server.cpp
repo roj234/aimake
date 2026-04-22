@@ -1,4 +1,5 @@
 #include "server/server-context.cpp"
+#include "server/server-chat.cpp"
 #include "server/server-http.cpp"
 #include "server/server-models.cpp"
 #include "server/server.cpp"

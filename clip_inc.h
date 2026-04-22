@@ -22,4 +22,5 @@
 #include "models/siglip.cpp"
 #include "models/step3vl.cpp"
 #include "models/whisper-enc.cpp"
+#include "models/yasa2.cpp"
 #include "models/youtuvl.cpp"

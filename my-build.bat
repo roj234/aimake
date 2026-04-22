@@ -22,7 +22,7 @@ set LIB_DIR=E:\AI\bin\libs
 set PROGRAM_DIR=%~dp0
 set CLANG_ARG=-Wl,-s,--no-insert-timestamp -lstdc++ -flto=full -O3 -DLLAMA_SHARED -DLLAMA_BUILD -I"%HEADER_DIR%" -L"%LIB_DIR%"
 
-echo ÇëÈ·ÈÏ£º7
+echo ÇëÈ·ÈÏ£º
 echo.
 echo Llama.cppÔ´ÂëÄ¿Â¼£º%LLAMA_CPP_DIR%
 echo Stable-diffusion.cppÔ´ÂëÄ¿Â¼£º%SD_CPP_DIR%
@@ -92,7 +92,8 @@ popd
 goto done
 
 :step2
-clang -I"%LLAMA_CPP_DIR%\src" "%PROGRAM_DIR%_llama.cpp" -I"%LLAMA_CPP_DIR%\ggml\src" -lggml-base -lggml -DLLAMA_SHARED -o %BIN_DIR%\llama.dll -shared %CLANG_ARG%
+call :proc_listcpp "%LLAMA_CPP_DIR%\src" %PROGRAM_DIR%\uni\_llama_src.cpp
+clang -I"%LLAMA_CPP_DIR%\src" "%PROGRAM_DIR%uni\_llama_src.cpp" -I"%LLAMA_CPP_DIR%\ggml\src" -lggml-base -lggml -DLLAMA_SHARED -o %BIN_DIR%\llama.dll -shared %CLANG_ARG%
 
 if %ERRORLEVEL% neq 0 (
 	title ±àÒëÊ§°Ü
@@ -115,6 +116,7 @@ popd
 
 pushd "%LIB_DIR%"
 
+::call :proc_listcpp "%LLAMA_CPP_DIR%\common" %PROGRAM_DIR%\uni\_llama_common.cpp
 clang -I"%LLAMA_CPP_DIR%\common" -I"%LLAMA_CPP_DIR%\vendor" "%PROGRAM_DIR%_common.cpp" -c -D_WIN32_WINNT=0xA00 -ffunction-sections -fdata-sections -flto=full -o "llama-common.o" -DLLAMA_COMMON_BUILD_COMMIT=\"%GIT_REV%\" %CLANG_ARG%
 
 popd
@@ -131,6 +133,7 @@ if %ERRORLEVEL% neq 0 (
 goto done
 
 :step4
+::call :proc_listcpp "%LLAMA_CPP_DIR%\tools\mtmd" %PROGRAM_DIR%\uni\_llama_mtmd.cpp
 clang -I"%LLAMA_CPP_DIR%\tools\mtmd" -I"%LLAMA_CPP_DIR%\vendor" "%PROGRAM_DIR%_mtmd.cpp" -lllama -lggml -lggml-base -o %BIN_DIR%\mtmd.dll -shared %CLANG_ARG%
 
 if %ERRORLEVEL% neq 0 (
@@ -147,7 +150,7 @@ goto done
 :step5
 set ARGS= -I"%LLAMA_CPP_DIR%\common" -I"%LLAMA_CPP_DIR%\vendor" -lmtmd -lggml-base -lggml -lllama -lws2_32 "%LIB_DIR%\llama-common.o" -I"%LLAMA_CPP_DIR%\tools"
 
-start /b "cli" clang "%PROGRAM_DIR%_cli.cpp" -I"%LLAMA_CPP_DIR%\tools\server" %ARGS% -o llama-cli.exe %CLANG_ARG%
+start /b "cli" clang "%PROGRAM_DIR%_cli.cpp" -D_WIN32_WINNT=0xA00 -I"%LLAMA_CPP_DIR%\tools\server" %ARGS% -o llama-cli.exe %CLANG_ARG%
 start /b "perplexity" clang "%LLAMA_CPP_DIR%\tools\perplexity\perplexity.cpp" %ARGS% -o llama-perplexity.exe %CLANG_ARG%
 start /b "imatrix" clang "%LLAMA_CPP_DIR%\tools\imatrix\imatrix.cpp" %ARGS% -o llama-imatrix.exe %CLANG_ARG%
 start /b "bench" clang "%LLAMA_CPP_DIR%\tools\llama-bench\llama-bench.cpp" %ARGS% -o llama-bench.exe %CLANG_ARG%
@@ -172,7 +175,8 @@ if "%GIT_REV%"=="" (
 )
 popd
 
-clang -I"%SD_CPP_DIR%\thirdparty" -I"%SD_CPP_DIR%\include" -I"%SD_CPP_DIR%\src" -I"%SD_CPP_DIR%\src\vocab"" "%PROGRAM_DIR%_sd.cpp" --shared -DGGML_MAX_NAME=256 -lggml -lggml-base %SD_LINK_ARG% -DSD_BUILD_DLL -o stable-diffusion.dll %CLANG_ARG% -D"SDCPP_BUILD_COMMIT=%GIT_REV%" %SD_CPP_LINK_ARG%
+call :proc_listcpp "%SD_CPP_DIR%\src" %PROGRAM_DIR%uni\_sd_dll.cpp
+clang -I"%SD_CPP_DIR%\thirdparty" -I"%SD_CPP_DIR%\include" -I"%SD_CPP_DIR%\src" -I"%SD_CPP_DIR%\src\vocab"" "%PROGRAM_DIR%uni\_sd_dll.cpp" "%SD_CPP_DIR%\thirdparty\zip.c" --shared -DGGML_MAX_NAME=256 -lggml -lggml-base %SD_LINK_ARG% -DSD_BUILD_DLL -o stable-diffusion.dll %CLANG_ARG% -D"SDCPP_BUILD_COMMIT=%GIT_REV%" %SD_CPP_LINK_ARG%
 
 if %ERRORLEVEL% neq 0 (
 	title ±àÒëÊ§°Ü
@@ -258,4 +262,23 @@ for %%a in (%GIT_ID:-= %) do (
 )
 
 endlocal & set "GIT_TAG=%TAG_PART%" & set "GIT_REV=%REV_PART%"
+exit /b
+
+:proc_listcpp
+setlocal enabledelayedexpansion
+
+set "SOURCE_DIR=%~1"
+set "OUTPUT_FILE=%~2"
+
+echo #pragma once> "%OUTPUT_FILE%"
+for /r "%SOURCE_DIR%" %%f in (*.cpp) do (
+    set "FILE_PATH=%%f"
+
+    :: ½«·´Ð±¸Ü \ Ìæ»»ÎªÕýÐ±¸Ü /
+    set "FORMATTED_PATH=!FILE_PATH:\=/!"
+
+    echo #include "!FORMATTED_PATH!">> "%OUTPUT_FILE%"
+)
+
+endlocal
 exit /b
