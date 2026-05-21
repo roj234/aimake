@@ -1,7 +1,7 @@
 
 #include <string>
 
-int LLAMA_BUILD_NUMBER = 114514;
+int LLAMA_BUILD_NUMBER = 9265;
 char const *LLAMA_COMMIT = LLAMA_COMMON_BUILD_COMMIT;
 char const *LLAMA_COMPILER = "clang 20.1.5";
 char const *LLAMA_BUILD_TARGET = "x86_64-w64-windows-gnu";
@@ -24,7 +24,7 @@ const char * llama_build_target(void) {
 }
 
 const char * llama_build_info(void) {
-    static std::string s = "b" + std::to_string(LLAMA_BUILD_NUMBER) + "-" + LLAMA_COMMIT;
+    static std::string s = "bB" + std::to_string(LLAMA_BUILD_NUMBER) + "-" + LLAMA_COMMIT;
     return s.c_str();
 }
 

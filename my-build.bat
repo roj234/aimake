@@ -42,11 +42,12 @@ title AIMake - llama.cpp和sd.cpp的Windows编译工具
 echo ========================================================
 echo   AIMake - llama.cpp和sd.cpp的Windows编译工具
 echo ========================================================
-echo   [1] 更新头文件与导出库 (.h / .a)
+echo   [1] 更新头文件与导出库 (.h / .a) 第2步前，2、3、4步后都要运行
 echo   [2] 编译 llama.dll
-echo   [3] 编译 llama-common.o (静态/通用组件)
+echo   [3] 编译 llama-common.dll (静态/通用组件)
 echo   [4] 编译 mtmd.dll
 echo   [5] 编译 llama 工具 (cli, server, imatrix...)
+echo   [8] 编译 llama-server
 echo   [6] 编译 stable-diffusion.dll
 echo   [7] 编译 sd 工具
 echo   [0] 退出
@@ -74,6 +75,7 @@ setlocal enabledelayedexpansion
 for %%F in (
     "%BIN_DIR%\ggml*.dll"
     "%BIN_DIR%\llama.dll"
+    "%BIN_DIR%\llama-common.dll"
     "%BIN_DIR%\mtmd.dll"
 ) do (
     if exist "%%F" (
@@ -117,7 +119,7 @@ popd
 pushd "%LIB_DIR%"
 
 ::call :proc_listcpp "%LLAMA_CPP_DIR%\common" %PROGRAM_DIR%\uni\_llama_common.cpp
-clang -I"%LLAMA_CPP_DIR%\common" -I"%LLAMA_CPP_DIR%\vendor" "%PROGRAM_DIR%_common.cpp" -c -D_WIN32_WINNT=0xA00 -ffunction-sections -fdata-sections -flto=full -o "llama-common.o" -DLLAMA_COMMON_BUILD_COMMIT=\"%GIT_REV%\" %CLANG_ARG%
+clang -I"%LLAMA_CPP_DIR%\common" -I"%LLAMA_CPP_DIR%\vendor" "%PROGRAM_DIR%_common.cpp" -D_WIN32_WINNT=0xA00 -ffunction-sections -fdata-sections -flto=full -shared -lllama -lggml -lggml-base -lws2_32 -o "%BIN_DIR%\llama-common.dll" -DLLAMA_COMMON_BUILD_COMMIT=\"%GIT_REV%\" %CLANG_ARG%
 
 popd
 
@@ -133,8 +135,8 @@ if %ERRORLEVEL% neq 0 (
 goto done
 
 :step4
-::call :proc_listcpp "%LLAMA_CPP_DIR%\tools\mtmd" %PROGRAM_DIR%\uni\_llama_mtmd.cpp
-clang -I"%LLAMA_CPP_DIR%\tools\mtmd" -I"%LLAMA_CPP_DIR%\vendor" "%PROGRAM_DIR%_mtmd.cpp" -lllama -lggml -lggml-base -o %BIN_DIR%\mtmd.dll -shared %CLANG_ARG%
+call :proc_listcpp "%LLAMA_CPP_DIR%\tools\mtmd\models" %PROGRAM_DIR%\uni\_llama_mtmd_models.cpp
+clang -I"%LLAMA_CPP_DIR%\tools\mtmd" -I"%LLAMA_CPP_DIR%\vendor" "%PROGRAM_DIR%_mtmd.cpp" "%PROGRAM_DIR%\uni\_llama_mtmd_models.cpp" -lllama -lggml -lggml-base -o %BIN_DIR%\mtmd.dll -shared %CLANG_ARG%
 
 if %ERRORLEVEL% neq 0 (
 	title 编译失败
@@ -148,13 +150,16 @@ if %ERRORLEVEL% neq 0 (
 goto done
 
 :step5
-set ARGS= -I"%LLAMA_CPP_DIR%\common" -I"%LLAMA_CPP_DIR%\vendor" -lmtmd -lggml-base -lggml -lllama -lws2_32 "%LIB_DIR%\llama-common.o" -I"%LLAMA_CPP_DIR%\tools"
+set ARGS= -I"%LLAMA_CPP_DIR%\common" -I"%LLAMA_CPP_DIR%\vendor" -lmtmd -lggml-base -lggml -lllama -lws2_32 -lllama-common -I"%LLAMA_CPP_DIR%\tools"
 
 start /b "cli" clang "%PROGRAM_DIR%_cli.cpp" -D_WIN32_WINNT=0xA00 -I"%LLAMA_CPP_DIR%\tools\server" %ARGS% -o llama-cli.exe %CLANG_ARG%
-start /b "perplexity" clang "%LLAMA_CPP_DIR%\tools\perplexity\perplexity.cpp" %ARGS% -o llama-perplexity.exe %CLANG_ARG%
+start /b "perplexity" clang "%LLAMA_CPP_DIR%\tools\perplexity\perplexity.cpp" "%LLAMA_CPP_DIR%\tools\perplexity\main.cpp" %ARGS% -o llama-perplexity.exe %CLANG_ARG%
 start /b "imatrix" clang "%LLAMA_CPP_DIR%\tools\imatrix\imatrix.cpp" %ARGS% -o llama-imatrix.exe %CLANG_ARG%
-start /b "bench" clang "%LLAMA_CPP_DIR%\tools\llama-bench\llama-bench.cpp" %ARGS% -o llama-bench.exe %CLANG_ARG%
-start /b "quantize" clang "%LLAMA_CPP_DIR%\tools\quantize\quantize.cpp" %ARGS% -o llama-quantize.exe %CLANG_ARG%
+start /b "bench" clang "%LLAMA_CPP_DIR%\tools\llama-bench\llama-bench.cpp" "%LLAMA_CPP_DIR%\tools\llama-bench\main.cpp" %ARGS% -o llama-bench.exe %CLANG_ARG%
+start /b "quantize" clang "%LLAMA_CPP_DIR%\tools\quantize\quantize.cpp" "%LLAMA_CPP_DIR%\tools\quantize\main.cpp" %ARGS% -o llama-quantize.exe %CLANG_ARG%
+
+:step8
+set ARGS= -I"%LLAMA_CPP_DIR%\common" -I"%LLAMA_CPP_DIR%\vendor" -lmtmd -lggml-base -lggml -lllama -lws2_32 -lllama-common -I"%LLAMA_CPP_DIR%\tools"
 clang "%PROGRAM_DIR%_server.cpp" %ARGS% -D_WIN32_WINNT=0xA00 -o llama-server.exe %CLANG_ARG%
 
 if %ERRORLEVEL% neq 0 (
@@ -250,10 +255,10 @@ for %%a in (%GIT_ID:-= %) do (
 set "current=0"
 for %%a in (%GIT_ID:-= %) do (
     set /a current+=1
-    
+
     :: 最后两段 (提交次数 和 g+哈希) 属于后半部分
     set /a rev_threshold=%count% - 1
-    
+
     if !current! LSS !rev_threshold! (
         if "!TAG_PART!"=="" (set "TAG_PART=%%a") else (set "TAG_PART=!TAG_PART!-%%a")
     ) else (

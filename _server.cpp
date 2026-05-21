@@ -7,3 +7,4 @@
 #include "server/server-queue.cpp"
 #include "server/server-common.cpp"
 #include "server/server-tools.cpp"
+#include "server/main.cpp"
