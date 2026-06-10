@@ -1,7 +1,7 @@
 
 #include <string>
 
-int LLAMA_BUILD_NUMBER = 9265;
+int LLAMA_BUILD_NUMBER = 9590;
 char const *LLAMA_COMMIT = LLAMA_COMMON_BUILD_COMMIT;
 char const *LLAMA_COMPILER = "clang 20.1.5";
 char const *LLAMA_BUILD_TARGET = "x86_64-w64-windows-gnu";
@@ -52,6 +52,7 @@ void llama_print_build_info(void) {
 #include "download.cpp"
 #include "fit.cpp"
 #include "hf-cache.cpp"
+#include "imatrix-loader.cpp"
 #include "json-partial.cpp"
 #include "json-schema-to-grammar.cpp"
 #include "llguidance.cpp"
