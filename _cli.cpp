@@ -6,4 +6,6 @@
 #include "server/server-common.cpp"
 #include "server/server-tools.cpp"
 #include "server/server-chat.cpp"
+#include "server/server-stream.cpp"
+#include "server/server-schema.cpp"
 #include "cli/main.cpp"

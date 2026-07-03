@@ -157,6 +157,7 @@ start /b "perplexity" clang "%LLAMA_CPP_DIR%\tools\perplexity\perplexity.cpp" "%
 start /b "imatrix" clang "%LLAMA_CPP_DIR%\tools\imatrix\imatrix.cpp" %ARGS% -o llama-imatrix.exe %CLANG_ARG%
 start /b "bench" clang "%LLAMA_CPP_DIR%\tools\llama-bench\llama-bench.cpp" "%LLAMA_CPP_DIR%\tools\llama-bench\main.cpp" %ARGS% -o llama-bench.exe %CLANG_ARG%
 start /b "quantize" clang "%LLAMA_CPP_DIR%\tools\quantize\quantize.cpp" "%LLAMA_CPP_DIR%\tools\quantize\main.cpp" %ARGS% -o llama-quantize.exe %CLANG_ARG%
+::start /b "diffusion-cli" clang "%LLAMA_CPP_DIR%\examples\diffusion\diffusion.cpp" "%LLAMA_CPP_DIR%\examples\diffusion\diffusion-cli.cpp" -I"%LLAMA_CPP_DIR%\examples\diffusion" %ARGS% -o llama-diffusion-cli.exe %CLANG_ARG%
 
 :step8
 set ARGS= -I"%LLAMA_CPP_DIR%\common" -I"%LLAMA_CPP_DIR%\vendor" -lmtmd -lggml-base -lggml -lllama -lws2_32 -lllama-common -I"%LLAMA_CPP_DIR%\tools"
