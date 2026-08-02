@@ -20,7 +20,7 @@ set BIN_DIR=E:\AI\bin
 set HEADER_DIR=E:\AI\bin\include
 set LIB_DIR=E:\AI\bin\libs
 set PROGRAM_DIR=%~dp0
-set CLANG_ARG=-Wl,-s,--no-insert-timestamp -lstdc++ -flto=full -O3 -DLLAMA_SHARED -DLLAMA_BUILD -I"%HEADER_DIR%" -L"%LIB_DIR%"
+set CLANG_ARG=-Wl,-s,--no-insert-timestamp -lstdc++ -flto=full -O3 -DLLAMA_SHARED -DLLAMA_BUILD -I"%HEADER_DIR%" -L"%LIB_DIR%" -DCPPHTTPLIB_FORM_URL_ENCODED_PAYLOAD_MAX_LENGTH=1048576 -DCPPHTTPLIB_LISTEN_BACKLOG=512 -DCPPHTTPLIB_REQUEST_URI_MAX_LENGTH=32768 -DCPPHTTPLIB_TCP_NODELAY=1
 
 echo «Î»∑»œ£∫
 echo.
@@ -119,7 +119,7 @@ popd
 pushd "%LIB_DIR%"
 
 ::call :proc_listcpp "%LLAMA_CPP_DIR%\common" %PROGRAM_DIR%\uni\_llama_common.cpp
-clang -I"%LLAMA_CPP_DIR%\common" -I"%LLAMA_CPP_DIR%\vendor" "%PROGRAM_DIR%_common.cpp" -D_WIN32_WINNT=0xA00 -ffunction-sections -fdata-sections -flto=full -shared -lllama -lggml -lggml-base -lws2_32 -o "%BIN_DIR%\llama-common.dll" -DLLAMA_COMMON_BUILD_COMMIT=\"%GIT_REV%\" %CLANG_ARG%
+clang -I"%LLAMA_CPP_DIR%\common" -I"%LLAMA_CPP_DIR%\vendor" "%PROGRAM_DIR%_common.cpp" -D_WIN32_WINNT=0xA00 -ffunction-sections -fdata-sections -flto=full -shared -lllama -lggml -lggml-base -lws2_32 -o "%BIN_DIR%\llama-common.dll" -DLLAMA_COMMON_BUILD_COMMIT=\"%GIT_REV%\" %CLANG_ARG% -DLLAMA_SUBPROCESS 
 
 popd
 
@@ -136,7 +136,7 @@ goto done
 
 :step4
 call :proc_listcpp "%LLAMA_CPP_DIR%\tools\mtmd\models" %PROGRAM_DIR%\uni\_llama_mtmd_models.cpp
-clang -I"%LLAMA_CPP_DIR%\tools\mtmd" -I"%LLAMA_CPP_DIR%\vendor" "%PROGRAM_DIR%_mtmd.cpp" "%PROGRAM_DIR%\uni\_llama_mtmd_models.cpp" -lllama -lggml -lggml-base -o %BIN_DIR%\mtmd.dll -shared %CLANG_ARG%
+clang -I"%LLAMA_CPP_DIR%\tools\mtmd" -I"%LLAMA_CPP_DIR%\vendor" "%PROGRAM_DIR%_mtmd.cpp" "%PROGRAM_DIR%\uni\_llama_mtmd_models.cpp" -lllama -lggml -lggml-base -o %BIN_DIR%\mtmd.dll -shared %CLANG_ARG% -DMTMD_VIDEO
 
 if %ERRORLEVEL% neq 0 (
 	title ±‡“Î ß∞‹

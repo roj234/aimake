@@ -9,4 +9,5 @@
 #include "server/server-tools.cpp"
 #include "server/server-stream.cpp"
 #include "server/server-schema.cpp"
+#include "server/server-mcp.cpp"
 #include "server/main.cpp"

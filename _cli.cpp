@@ -8,4 +8,10 @@
 #include "server/server-chat.cpp"
 #include "server/server-stream.cpp"
 #include "server/server-schema.cpp"
+#include "server/server-mcp.cpp"
+#include "server/server-http.cpp"
+#include "cli/cli-client.cpp"
+#include "cli/cli-context.cpp"
 #include "cli/main.cpp"
+#define _CLI
+#include "server/server.cpp"

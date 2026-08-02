@@ -1,7 +1,7 @@
 
 #include <string>
 
-int LLAMA_BUILD_NUMBER = 9864;
+int LLAMA_BUILD_NUMBER = 10223;
 char const *LLAMA_COMMIT = LLAMA_COMMON_BUILD_COMMIT;
 char const *LLAMA_COMPILER = "clang 20.1.5";
 char const *LLAMA_BUILD_TARGET = "x86_64-w64-windows-gnu";
@@ -65,6 +65,8 @@ void llama_print_build_info(void) {
 #include "sampling.cpp"
 #include "speculative.cpp"
 #include "unicode.cpp"
+#include "trie.cpp"
+#include "subproc.cpp"
 
 
 #include "../vendor/cpp-httplib/httplib.cpp"
